@@ -54,7 +54,7 @@ app.post('/api/users/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    res.json({ id: user.id, email: user.email, name: user.full_name });
+    res.json({ id: user.id, email: user.email, full_name: user.name });
   } catch (err) {
     console.error('Login error:', err);
     // Return a test user if database is not available
