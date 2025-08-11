@@ -61,14 +61,14 @@ const ExpenseManagement = () => {
       // If there's a selected event, fetch its expenses
       if (selectedEvent) {
         const expensesResponse = await getAllExpenses(selectedEvent);
-        const expensesData = expensesResponse.data || [];
+        const expensesData = expensesResponse.data?.data || [];
         setExpenses(Array.isArray(expensesData) ? expensesData : []);
       } else if (eventsData.length > 0) {
         // If no event selected but events exist, select the first one
         const firstEventId = eventsData[0].id;
         setSelectedEvent(firstEventId);
         const expensesResponse = await getAllExpenses(firstEventId);
-        const expensesData = expensesResponse.data || [];
+        const expensesData = expensesResponse.data?.data || [];
         setExpenses(Array.isArray(expensesData) ? expensesData : []);
       }
     } catch (error) {
@@ -96,7 +96,7 @@ const ExpenseManagement = () => {
       for (const event of events) {
         console.log("Fetching expenses for event:", event.id);
         const expensesResponse = await getAllExpenses(event.id);
-        const expensesData = expensesResponse.data || [];
+        const expensesData = expensesResponse.data?.data || [];
         console.log("Expenses data for event", event.id, ":", expensesData);
         
         if (Array.isArray(expensesData)) {
@@ -124,7 +124,7 @@ const ExpenseManagement = () => {
       console.log("Full expenses response:", expensesResponse);
       
       // Try different possible response structures
-      let expensesData = expensesResponse.data || [];
+      let expensesData = expensesResponse.data?.data || [];
       
       // Check if data is nested differently
       if (expensesResponse.data && expensesResponse.data.data) {
