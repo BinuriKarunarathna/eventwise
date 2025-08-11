@@ -54,7 +54,8 @@ const ExpenseManagement = () => {
       
       // Fetch user events
       const eventsResponse = await getAllEvents(userId);
-      const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
+      // const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
+      const eventsData = eventsResponse.data?.data || [];
       setEvents(eventsData);
 
       // If there's a selected event, fetch its expenses
