@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db'); // MySQL pool connection
 
 // Get all events
-router.get('/api/events', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const [events] = await pool.query('SELECT * FROM event ORDER BY start_date DESC');
     res.json({ data: events });
@@ -14,7 +14,7 @@ router.get('/api/events', async (req, res) => {
 });
 
 // Create event
-router.post('/api/events', async (req, res) => {
+router.post('/', async (req, res) => {
   const { name, description, location, startDate, endDate, totalBudget, user_id } = req.body;
 
   // Check for required fields
@@ -48,7 +48,7 @@ router.post('/api/events', async (req, res) => {
 });
 
 // Update event by ID
-router.put('/api/events/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   const eventId = req.params.id;
   const { name, description, location, startDate, endDate, totalBudget } = req.body;
 
@@ -72,7 +72,7 @@ router.put('/api/events/:id', async (req, res) => {
 });
 
 // Get events by user ID - CORRECTED VERSION
-router.get('/events/user/:user_id', async (req, res) => {
+router.get('/user/:user_id', async (req, res) => {
   const userId = req.params.user_id;
 
   try {
@@ -88,7 +88,7 @@ router.get('/events/user/:user_id', async (req, res) => {
 });
 
 // Delete event by ID - ADD THIS TO YOUR BACKEND
-router.delete('/api/events/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const eventId = req.params.id;
 
   try {
@@ -111,7 +111,7 @@ router.delete('/api/events/:id', async (req, res) => {
 });
 
 // Get event by ID
-router.get('/api/events/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   const eventId = req.params.id;
 
   try {
