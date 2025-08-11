@@ -1,6 +1,6 @@
 import api from './api';
 
-export const getAllEvents = (userId) => api.get(`/api/events/user/${userId}`);
+export const getAllEvents = (user_id) => api.get(`/api/events/user/${user_id}`);
 export const getAllEventsFromAllUsers = () => api.get('/api/events'); // Get all events from all users
 export const getEventById = (id) => api.get(`/api/events/${id}`);
 export const createEvent = (eventData) => api.post('/api/events', eventData);

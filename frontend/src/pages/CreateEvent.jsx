@@ -28,7 +28,7 @@ const CreateEvent = () => {
         console.log("Parsed user:", parsedUser);
         
         // More flexible user ID extraction
-        const extractedUserId = parsedUser?.id || parsedUser?.userId || parsedUser?.user_id;
+        const extractedUserId = parsedUser?.id ||  parsedUser?.user_id;
         console.log("Extracted user ID:", extractedUserId);
         
         setUser(parsedUser);
