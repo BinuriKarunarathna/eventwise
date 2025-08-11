@@ -44,7 +44,7 @@ const Profile = () => {
     setError('');
 
     // First fetch user data (this should always exist)
-    axios.get(`http://localhost:3001/api/users/${userId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/users/${userId}`)
       .then(userResponse => {
         const userData = userResponse.data;
         
@@ -58,7 +58,7 @@ const Profile = () => {
         }));
 
         // Now try to fetch profile data
-        return axios.get(`http://localhost:3001/api/profiles/${userId}`);
+        return axios.get(`${process.env.REACT_APP_API_URL}/api/profiles/${userId}`);
       })
       .then(profileResponse => {
         // Profile exists - populate the profile fields
@@ -161,10 +161,10 @@ const Profile = () => {
       };
 
       // Update user table
-      const userUpdatePromise = axios.put(`http://localhost:3001/api/users/${userId}`, userData);
+      const userUpdatePromise = axios.put(`${process.env.REACT_APP_API_URL}/api/users/${userId}`, userData);
       
       // Update/Create profile table (this will create if doesn't exist)
-      const profileUpdatePromise = axios.put(`http://localhost:3001/api/profiles/${userId}`, profileData);
+      const profileUpdatePromise = axios.put(`${process.env.REACT_APP_API_URL}/api/profiles/${userId}`, profileData);
 
       await Promise.all([userUpdatePromise, profileUpdatePromise]);
       

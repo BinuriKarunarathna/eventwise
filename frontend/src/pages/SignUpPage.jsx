@@ -30,11 +30,11 @@ const SignUpPage = () => {
   console.log('Submitting:', formData);
 
   try {
-    const response = await fetch('http://localhost:3001/api/users/register', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        fullName: formData.fullName,
+        full_name: formData.fullName,
         email: formData.email,
         password: formData.password
       }),
