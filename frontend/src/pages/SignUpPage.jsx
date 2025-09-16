@@ -129,7 +129,7 @@ const SignUpPage = () => {
             </button>
 
             <p className="text-sm text-center">
-              Already have an account? <a href="#" className="text-red-500 hover:underline">Login</a>
+              Already have an account? <a href="/login" className="text-red-500 hover:underline">Login</a>
             </p>
 
             <div className="flex items-center justify-center space-x-4 mt-4">
