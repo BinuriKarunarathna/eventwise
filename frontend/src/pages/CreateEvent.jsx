@@ -336,9 +336,6 @@ const CreateEvent = () => {
   };
 
   
-  // Remove handleAddCategory since categories are now auto-populated from existing events
-  // Categories show existing events with their names, budgets, and descriptions
-  
 
   return (
     <div className="min-h-screen bg-gray-50">

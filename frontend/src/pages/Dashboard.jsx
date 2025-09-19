@@ -25,135 +25,96 @@ const Dashboard = () => {
 
   // Initialize user data from localStorage on mount
   useEffect(() => {
-    console.log("Initializing dashboard...");
-    
     try {
-  const userData = localStorage.getItem('user');
-      
-  console.log("Raw user data from localStorage:", userData);
-      
+      const userData = localStorage.getItem('user');
       if (userData) {
         const parsedUser = JSON.parse(userData);
-        console.log("Parsed user:", parsedUser);
-        
-        // More flexible user ID extraction
         const extractedUserId = parsedUser?.id || parsedUser?.userId || parsedUser?.user_id;
-        console.log("Extracted user ID:", extractedUserId);
-        
         setUser(parsedUser);
-        
         if (extractedUserId) {
           setUserId(extractedUserId);
         } else {
-          console.warn("No user ID found in user data, but setting loading to false");
           setLoading(false);
         }
       } else {
-        console.log("No user data found in localStorage");
         setLoading(false);
       }
     } catch (error) {
-      console.error("Error parsing user data:", error);
       setLoading(false);
     }
   }, []);
 
   const processChartData = useCallback((eventsData, expensesData = []) => {
-    console.log("Processing chart data...");
-    console.log("Events data for processing:", eventsData);
-    console.log("Expenses data for processing:", expensesData);
-    
-    // Calculate total budget from events
-    const totalBudget = eventsData.reduce((sum, event) => {
-      const budget = parseFloat(event.total_budget || 0);
-      console.log(`Event: ${event.name}, Budget: ${budget}`);
-      return sum + budget;
-    }, 0);
-    
-    // Calculate total spent from actual expenses
+    const totalBudget = eventsData.reduce((sum, event) => sum + parseFloat(event.total_budget || 0), 0);
     const totalSpent = expensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-    
-    // Calculate remaining budget
     const remaining = totalBudget - totalSpent;
+    setDashboardStats({ totalBudget, totalSpent, remaining });
 
-    console.log("Calculated stats:", { totalBudget, totalSpent, remaining });
-
-    setDashboardStats({
-      totalBudget,
-      totalSpent,
-      remaining
-    });
-
-    // Process Monthly Spending Data (last 6 months) using actual expenses
+    // Monthly Spending Data
     const monthlyData = [];
     const currentDate = new Date();
-    
     for (let i = 5; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-      
-      // Filter expenses by month
       const monthExpenses = expensesData.filter(expense => {
         const expenseDate = new Date(expense.created_at || expense.date);
         return expenseDate.getMonth() === date.getMonth() && expenseDate.getFullYear() === date.getFullYear();
       });
-      
       const monthSpending = monthExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-      
       if (monthSpending > 0) {
-        monthlyData.push({
-          name: monthName,
-          value: monthSpending
-        });
+        monthlyData.push({ name: monthName, value: monthSpending });
       }
     }
-    console.log("Monthly spending data:", monthlyData);
     setMonthlySpendingData(monthlyData);
 
-    // Process Budget Allocation by Event
+    // Budget Allocation by Event
     const eventAllocation = eventsData.map((event, index) => ({
       name: event.name || `Event ${index + 1}`,
       value: parseFloat(event.total_budget || 0)
     })).filter(item => item.value > 0);
-
-    console.log("Budget allocation data:", eventAllocation);
     setBudgetAllocationData(eventAllocation);
   }, []);
+  const getTotalUserExpenses = useCallback(async (eventsData) => {
+    if (!userId || !eventsData.length) return 0;
+    try {
+      let totalSpent = 0;
+      for (const event of eventsData) {
+        const expensesResponse = await getAllExpenses(event.id);
+        const expensesData = expensesResponse.data?.data || [];
+        if (Array.isArray(expensesData)) {
+          const eventTotal = expensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+          totalSpent += eventTotal;
+        }
+      }
+      return totalSpent;
+    } catch (error) {
+      return 0;
+    }
+  }, [userId]);
 
   const fetchDashboardData = useCallback(async () => {
     if (!userId) {
-      console.log("No user ID found in fetchDashboardData, using default data");
-      // Set default empty data instead of returning early
       setEvents([]);
       setAllExpenses([]);
       processChartData([], []);
       setLoading(false);
       return;
     }
-
     try {
       setLoading(true);
-      console.log("Fetching events for user:", userId);
-      
-      // Fetch events
       const eventsResponse = await getAllEvents(userId);
-      console.log("Events response:", eventsResponse);
-      console.log("Events response data:", eventsResponse.data);
-      
-      // The API returns {data: [...events]}, and axios extracts response.data
-      // So we need response.data.data to get the actual events array
       const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
-      console.log("Processed events data:", eventsData);
-      console.log("Number of events:", eventsData.length);
       setEvents(eventsData);
-      
-      // Fetch expenses for all events
+
+      // Use the consistent total user expenses function
+      const totalSpent = await getTotalUserExpenses(eventsData);
+
+      // Fetch all expenses for chart and table display
       const allExpensesData = [];
       for (const event of eventsData) {
         try {
-          console.log(`Fetching expenses for event ${event.id}:`, event.name);
           const expensesResponse = await getAllExpenses(event.id);
-          const eventExpenses = expensesResponse.data || [];
+          const eventExpenses = expensesResponse.data?.data || [];
           allExpensesData.push(...eventExpenses.map(expense => ({
             ...expense,
             eventId: event.id,
@@ -163,19 +124,27 @@ const Dashboard = () => {
           console.log(`No expenses found for event ${event.id}:`, expenseError.message);
         }
       }
-      
-      console.log("All expenses data:", allExpensesData);
       setAllExpenses(allExpensesData);
+
+      // Calculate total budget and remaining
+      const totalBudget = eventsData.reduce((sum, event) => sum + parseFloat(event.total_budget || 0), 0);
+      const remaining = totalBudget - totalSpent;
+
+      setDashboardStats({
+        totalBudget,
+        totalSpent,
+        remaining
+      });
+
       processChartData(eventsData, allExpensesData);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
       setEvents([]);
       setAllExpenses([]);
       processChartData([], []);
     } finally {
       setLoading(false);
     }
-  }, [userId, processChartData]);
+  }, [userId, getTotalUserExpenses, processChartData]);
 
   // Fetch data when userId is available
   useEffect(() => {
@@ -244,7 +213,7 @@ const Dashboard = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Access Required</h2>
             <p className="text-gray-600 text-lg mb-6">Please log in to view your dashboard and manage events</p>
             <button
-              onClick={() => window.location.href = '/login'}
+              onClick={() => window.location.href = '/'}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105 shadow-lg"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
