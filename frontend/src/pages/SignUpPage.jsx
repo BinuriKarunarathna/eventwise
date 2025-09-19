@@ -44,7 +44,7 @@ const SignUpPage = () => {
 
     if (response.ok) {
       alert('Account created successfully!');
-      navigate('/home');
+      navigate('/');
     } else {
       const errorText = await response.text();
       console.error('Signup failed:', errorText);

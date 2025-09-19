@@ -52,21 +52,16 @@ const Dashboard = () => {
     setDashboardStats({ totalBudget, totalSpent, remaining });
 
     // Monthly Spending Data
-    const monthlyData = [];
-    const currentDate = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-      const monthExpenses = expensesData.filter(expense => {
-        const expenseDate = new Date(expense.created_at || expense.date);
-        return expenseDate.getMonth() === date.getMonth() && expenseDate.getFullYear() === date.getFullYear();
-      });
-      const monthSpending = monthExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-      if (monthSpending > 0) {
-        monthlyData.push({ name: monthName, value: monthSpending });
-      }
-    }
-    setMonthlySpendingData(monthlyData);
+    const eventSpendingChartData = eventsData.map(event => {
+    const eventExpenses = expensesData.filter(exp => exp.eventId === event.id);
+    const spent = eventExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    return {
+      name: event.name || `Event ${event.id}`,
+      value: spent
+    };
+  }).filter(item => item.value > 0);
+
+  setMonthlySpendingData(eventSpendingChartData);
 
     // Budget Allocation by Event
     const eventAllocation = eventsData.map((event, index) => ({
@@ -75,31 +70,12 @@ const Dashboard = () => {
     })).filter(item => item.value > 0);
     setBudgetAllocationData(eventAllocation);
   }, []);
-  const getTotalUserExpenses = useCallback(async (eventsData) => {
-    if (!userId || !eventsData.length) return 0;
-    try {
-      let totalSpent = 0;
-      for (const event of eventsData) {
-        const expensesResponse = await getAllExpenses(event.id);
-        const expensesData = expensesResponse.data?.data || [];
-        if (Array.isArray(expensesData)) {
-          const eventTotal = expensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
-          totalSpent += eventTotal;
-        }
-      }
-      return totalSpent;
-    } catch (error) {
-      return 0;
-    }
-  }, [userId]);
-
-  // ...existing code...
-
+  
   const fetchDashboardData = useCallback(async () => {
     if (!userId) {
       setEvents([]);
       setAllExpenses([]);
-      setEventSpendingData([]); // ⭐ NEW
+      setEventSpendingData([]); 
       processChartData([], []);
       setLoading(false);
       return;
@@ -111,7 +87,7 @@ const Dashboard = () => {
       setEvents(eventsData);
 
       let allExpensesData = [];
-      let perEventData = []; // ⭐ NEW
+      let perEventData = [];
 
       for (const event of eventsData) {
         try {
@@ -125,7 +101,7 @@ const Dashboard = () => {
             }))
           );
 
-          // ⭐ NEW: build per-event spending data
+          
           const eventTotal = eventExpenses.reduce(
             (sum, expense) => sum + parseFloat(expense.amount || 0),
             0
@@ -135,12 +111,12 @@ const Dashboard = () => {
             spent: eventTotal,
           });
         } catch (expenseError) {
-          // skip this event if expenses fail
+          console.error("Error fetching expenses for event:", event.id, expenseError);
         }
       }
 
       setAllExpenses(allExpensesData);
-      setEventSpendingData(perEventData); // ⭐ NEW
+      setEventSpendingData(perEventData); 
 
       const totalSpent = allExpensesData.reduce(
         (sum, expense) => sum + parseFloat(expense.amount || 0),
@@ -162,7 +138,7 @@ const Dashboard = () => {
     } catch (error) {
       setEvents([]);
       setAllExpenses([]);
-      setEventSpendingData([]); // ⭐ NEW
+      setEventSpendingData([]); 
       processChartData([], []);
     } finally {
       setLoading(false);
