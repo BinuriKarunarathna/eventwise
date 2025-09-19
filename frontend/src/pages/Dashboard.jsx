@@ -92,59 +92,63 @@ const Dashboard = () => {
     }
   }, [userId]);
 
-  const fetchDashboardData = useCallback(async () => {
-    if (!userId) {
-      setEvents([]);
-      setAllExpenses([]);
-      processChartData([], []);
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      const eventsResponse = await getAllEvents(userId);
-      const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
-      setEvents(eventsData);
+  // ...existing code...
 
-      // Use the consistent total user expenses function
-      const totalSpent = await getTotalUserExpenses(eventsData);
+const fetchDashboardData = useCallback(async () => {
+  if (!userId) {
+    setEvents([]);
+    setAllExpenses([]);
+    processChartData([], []);
+    setLoading(false);
+    return;
+  }
+  try {
+    setLoading(true);
+    const eventsResponse = await getAllEvents(userId);
+    const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
+    setEvents(eventsData);
 
-      // Fetch all expenses for chart and table display
-      const allExpensesData = [];
-      for (const event of eventsData) {
-        try {
-          const expensesResponse = await getAllExpenses(event.id);
-          const eventExpenses = expensesResponse.data?.data || [];
-          allExpensesData.push(...eventExpenses.map(expense => ({
-            ...expense,
-            eventId: event.id,
-            eventName: event.name
-          })));
-        } catch (expenseError) {
-          console.log(`No expenses found for event ${event.id}:`, expenseError.message);
-        }
+    // Fetch all expenses for all events for the user
+    let allExpensesData = [];
+    for (const event of eventsData) {
+      try {
+        const expensesResponse = await getAllExpenses(event.id);
+        const eventExpenses = expensesResponse.data?.data || [];
+        allExpensesData = allExpensesData.concat(eventExpenses.map(expense => ({
+          ...expense,
+          eventId: event.id,
+          eventName: event.name
+        })));
+      } catch (expenseError) {
+        // Ignore missing expenses for an event
       }
-      setAllExpenses(allExpensesData);
-
-      // Calculate total budget and remaining
-      const totalBudget = eventsData.reduce((sum, event) => sum + parseFloat(event.total_budget || 0), 0);
-      const remaining = totalBudget - totalSpent;
-
-      setDashboardStats({
-        totalBudget,
-        totalSpent,
-        remaining
-      });
-
-      processChartData(eventsData, allExpensesData);
-    } catch (error) {
-      setEvents([]);
-      setAllExpenses([]);
-      processChartData([], []);
-    } finally {
-      setLoading(false);
     }
-  }, [userId, getTotalUserExpenses, processChartData]);
+    setAllExpenses(allExpensesData);
+
+    // Calculate total spent from all expenses
+    const totalSpent = allExpensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+
+    // Calculate total budget and remaining
+    const totalBudget = eventsData.reduce((sum, event) => sum + parseFloat(event.total_budget || 0), 0);
+    const remaining = totalBudget - totalSpent;
+
+    setDashboardStats({
+      totalBudget,
+      totalSpent,
+      remaining
+    });
+
+    processChartData(eventsData, allExpensesData);
+  } catch (error) {
+    setEvents([]);
+    setAllExpenses([]);
+    processChartData([], []);
+  } finally {
+    setLoading(false);
+  }
+}, [userId, processChartData]);
+
+// ...existing code...
 
   // Fetch data when userId is available
   useEffect(() => {
