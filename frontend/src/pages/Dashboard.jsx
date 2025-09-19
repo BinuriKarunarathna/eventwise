@@ -113,7 +113,10 @@ const fetchDashboardData = useCallback(async () => {
     for (const event of eventsData) {
       try {
         const expensesResponse = await getAllExpenses(event.id);
+        console.log('Event:', event.id, event.name);
+  console.log('Expenses response:', expensesResponse);
         const eventExpenses = expensesResponse.data?.data || [];
+        console.log('Event expenses:', eventExpenses);
         allExpensesData = allExpensesData.concat(eventExpenses.map(expense => ({
           ...expense,
           eventId: event.id,
@@ -147,7 +150,6 @@ const fetchDashboardData = useCallback(async () => {
     setLoading(false);
   }
 }, [userId, processChartData]);
-
 // ...existing code...
 
   // Fetch data when userId is available
