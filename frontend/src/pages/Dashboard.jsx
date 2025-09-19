@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [monthlySpendingData, setMonthlySpendingData] = useState([]);
   const [budgetAllocationData, setBudgetAllocationData] = useState([]);
+  const [eventSpendingData, setEventSpendingData] = useState([]);
   const [allExpenses, setAllExpenses] = useState([]);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -94,62 +95,79 @@ const Dashboard = () => {
 
   // ...existing code...
 
-const fetchDashboardData = useCallback(async () => {
-  if (!userId) {
-    setEvents([]);
-    setAllExpenses([]);
-    processChartData([], []);
-    setLoading(false);
-    return;
-  }
-  try {
-    setLoading(true);
-    const eventsResponse = await getAllEvents(userId);
-    const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
-    setEvents(eventsData);
-
-    // Fetch all expenses for all events for the user
-    let allExpensesData = [];
-    for (const event of eventsData) {
-      try {
-        const expensesResponse = await getAllExpenses(event.id);
-        console.log('Event:', event.id, event.name);
-  console.log('Expenses response:', expensesResponse);
-        const eventExpenses = expensesResponse.data?.data || [];
-        console.log('Event expenses:', eventExpenses);
-        allExpensesData = allExpensesData.concat(eventExpenses.map(expense => ({
-          ...expense,
-          eventId: event.id,
-          eventName: event.name
-        })));
-      } catch (expenseError) {
-        // Ignore missing expenses for an event
-      }
+  const fetchDashboardData = useCallback(async () => {
+    if (!userId) {
+      setEvents([]);
+      setAllExpenses([]);
+      setEventSpendingData([]); // ⭐ NEW
+      processChartData([], []);
+      setLoading(false);
+      return;
     }
-    setAllExpenses(allExpensesData);
+    try {
+      setLoading(true);
+      const eventsResponse = await getAllEvents(userId);
+      const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
+      setEvents(eventsData);
 
-    // Calculate total spent from all expenses
-    const totalSpent = allExpensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
+      let allExpensesData = [];
+      let perEventData = []; // ⭐ NEW
 
-    // Calculate total budget and remaining
-    const totalBudget = eventsData.reduce((sum, event) => sum + parseFloat(event.total_budget || 0), 0);
-    const remaining = totalBudget - totalSpent;
+      for (const event of eventsData) {
+        try {
+          const expensesResponse = await getAllExpenses(event.id);
+          const eventExpenses = expensesResponse.data?.data || [];
+          allExpensesData = allExpensesData.concat(
+            eventExpenses.map((expense) => ({
+              ...expense,
+              eventId: event.id,
+              eventName: event.name,
+            }))
+          );
 
-    setDashboardStats({
-      totalBudget,
-      totalSpent,
-      remaining
-    });
+          // ⭐ NEW: build per-event spending data
+          const eventTotal = eventExpenses.reduce(
+            (sum, expense) => sum + parseFloat(expense.amount || 0),
+            0
+          );
+          perEventData.push({
+            name: event.name || `Event ${event.id}`,
+            spent: eventTotal,
+          });
+        } catch (expenseError) {
+          // skip this event if expenses fail
+        }
+      }
 
-    processChartData(eventsData, allExpensesData);
-  } catch (error) {
-    setEvents([]);
-    setAllExpenses([]);
-    processChartData([], []);
-  } finally {
-    setLoading(false);
-  }
-}, [userId, processChartData]);
+      setAllExpenses(allExpensesData);
+      setEventSpendingData(perEventData); // ⭐ NEW
+
+      const totalSpent = allExpensesData.reduce(
+        (sum, expense) => sum + parseFloat(expense.amount || 0),
+        0
+      );
+      const totalBudget = eventsData.reduce(
+        (sum, event) => sum + parseFloat(event.total_budget || 0),
+        0
+      );
+      const remaining = totalBudget - totalSpent;
+
+      setDashboardStats({
+        totalBudget,
+        totalSpent,
+        remaining,
+      });
+
+      processChartData(eventsData, allExpensesData);
+    } catch (error) {
+      setEvents([]);
+      setAllExpenses([]);
+      setEventSpendingData([]); // ⭐ NEW
+      processChartData([], []);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, processChartData]);;
 // ...existing code...
 
   // Fetch data when userId is available
