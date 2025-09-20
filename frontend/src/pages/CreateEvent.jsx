@@ -21,16 +21,12 @@ const CreateEvent = () => {
   useEffect(() => {
     try {
       const userData = localStorage.getItem('user');
-      console.log("Raw user data from localStorage:", userData);
-      
+      console.log("Raw user data from localStorage:", userData);      
       if (userData) {
         const parsedUser = JSON.parse(userData);
-        console.log("Parsed user:", parsedUser);
-        
-        // More flexible user ID extraction
+        console.log("Parsed user:", parsedUser);        
         const extractedUserId = parsedUser?.id ||  parsedUser?.user_id;
-        console.log("Extracted user ID:", extractedUserId);
-        
+        console.log("Extracted user ID:", extractedUserId);        
         setUser(parsedUser);
         setUserId(extractedUserId);
       } else {
@@ -52,39 +48,20 @@ const CreateEvent = () => {
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
-        console.log("Attempting to fetch events for user:", userId);
-        console.log("User object:", user);
-        console.log("API endpoint will be: http://localhost:3001/api/events/user/" + userId);
-        
         // Get events for the current user
         const response = await getAllEvents(userId);
-        console.log("API Response:", response);
-        console.log("Response type:", typeof response);
-        console.log("Response data:", response?.data);
-        
-        // The API returns {data: [...events]}, and axios extracts response.data
-        // So we need response.data.data to get the actual events array
-        const events = response?.data?.data || response?.data || [];
-        
-        console.log("Processed events:", events);
-        console.log("Number of events found:", events ? events.length : 0);
-        console.log("Is events an array?", Array.isArray(events));
-        
+        const events = response?.data?.data || response?.data || [];        
         if (!events || !Array.isArray(events) || events.length === 0) {
           console.log("No events found or invalid format - setting empty categories");
           setCategories([]);
           return;
-        }
-        
+        }        
         // Group events by name and calculate total budget for each category
-        const eventGroups = {};
-        
+        const eventGroups = {};        
         events.forEach(event => {
-          const categoryName = event.name || event.event_name || 'Unnamed Event';
-          
+          const categoryName = event.name || event.event_name || 'Unnamed Event';          
           if (eventGroups[categoryName]) {
             // If category exists, add to the budget and combine descriptions
             eventGroups[categoryName].totalBudget += parseFloat(event.total_budget || event.budget || 0);
@@ -101,8 +78,7 @@ const CreateEvent = () => {
               count: 1
             };
           }
-        });
-        
+        });        
         // Transform grouped events into category format
         const eventCategories = Object.values(eventGroups).map(group => ({
           category: group.categoryName,
@@ -112,8 +88,7 @@ const CreateEvent = () => {
             : group.descriptions[0],
           eventIds: group.eventIds, // Keep all event IDs in this category
           count: group.count
-        }));
-        
+        }));        
         setCategories(eventCategories);
         console.log("Loaded and grouped events as categories:", eventCategories);
       } catch (error) {
@@ -124,91 +99,72 @@ const CreateEvent = () => {
           status: error.response?.status,
           statusText: error.response?.statusText,
           url: error.config?.url
-        });
-        
+        });        
         if (error.response?.status === 404) {
           console.log("❌ The endpoint GET /api/events/user/" + userId + " does not exist on your backend");
           console.log("You need to implement this endpoint in your backend to fetch user's events");
-        }
-        
-        // Set empty categories if there's an error (like 404 if no events exist)
+        }        
         setCategories([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchExistingEvents();
-  }, [userId]); // Only depend on userId to avoid endless loops
+  }, [userId]); 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     // Validation
     if (!eventName || !startDate || !endDate || !budget || !userId) {
       alert("Please fill in all required fields (Event Name, Start Date, End Date, Budget)");
       return;
     }
-
     if (parseFloat(budget) <= 0) {
       alert("Budget must be greater than 0");
       return;
     }
-
-    // Create the event with the correct structure for your database
-    // Try multiple field naming conventions
     const eventData = {
       name: eventName,
-      description: description || "", // Ensure description is not undefined
-      location: location || "", // Ensure location is not undefined
+      description: description || "", 
+      location: location || "", 
       startDate,
       endDate,
       totalBudget: parseFloat(budget),
-      userId: userId, // This should match your database field user_id
-      user_id: userId, // Alternative naming convention
-      budget: parseFloat(budget) // Alternative field name
+      userId: userId, 
+      user_id: userId, 
+      budget: parseFloat(budget) 
     };
-
     console.log("Sending event data:", eventData);
     console.log("User from localStorage:", user);
     console.log("Start Date:", startDate, "End Date:", endDate);
-
     try {
       setLoading(true);
       // Create the event
       const eventResponse = await createEvent(eventData);
       console.log("Event created:", eventResponse.data);
-
-      alert("Event created successfully!");
-      
+      alert("Event created successfully!");      
       // Reset form after successful creation
       setEventName("");
       setDescription("");
       setLocation("");
       setStartDate("");
       setEndDate("");
-      setBudget("");
-      
+      setBudget("");      
       // Refresh the categories list to include the new event
       try {
         const response = await getAllEvents(userId); // Get user's events
-        console.log("Refresh API Response:", response);
-        
-        // The API returns {data: [...events]}, and axios extracts response.data
+        console.log("Refresh API Response:", response);        
         const events = response?.data?.data || response?.data || [];
-        console.log("Refresh events:", events);
-        
+        console.log("Refresh events:", events);        
         if (!events || !Array.isArray(events) || events.length === 0) {
           console.log("No events found during refresh");
           setCategories([]);
           return;
-        }
-        
+        }        
         // Group events by name and calculate total budget for each category
-        const eventGroups = {};
-        
+        const eventGroups = {};        
         events.forEach(event => {
-          const categoryName = event.name || event.event_name || 'Unnamed Event';
-          
+          const categoryName = event.name || event.event_name || 'Unnamed Event';          
           if (eventGroups[categoryName]) {
             eventGroups[categoryName].totalBudget += parseFloat(event.total_budget || event.budget || 0);
             eventGroups[categoryName].descriptions.push(event.description || 'No description');
@@ -223,8 +179,8 @@ const CreateEvent = () => {
               count: 1
             };
           }
-        });
-        
+        });   
+        //Convert grouped data to an array     
         const eventCategories = Object.values(eventGroups).map(group => ({
           category: group.categoryName,
           amount: group.totalBudget,
@@ -233,15 +189,12 @@ const CreateEvent = () => {
             : group.descriptions[0],
           eventIds: group.eventIds,
           count: group.count
-        }));
-        
+        }));        
         setCategories(eventCategories);
         console.log("Refreshed categories after event creation:", eventCategories);
       } catch (refreshError) {
         console.error("Error refreshing categories:", refreshError);
-        // Don't show error to user, just log it
-      }
-      
+      }      
     } catch (error) {
       console.error("Error creating event:", error);
       console.error("Error details:", {
@@ -250,15 +203,12 @@ const CreateEvent = () => {
         status: error.response?.status,
         statusText: error.response?.statusText,
         config: error.config
-      });
-      
+      });      
       if (error.response) {
         // Server responded with error status
         const status = error.response.status;
-        const message = error.response.data?.message || error.response.data || 'Unknown server error';
-        
-        console.log("Full error response:", JSON.stringify(error.response.data, null, 2));
-        
+        const message = error.response.data?.message || error.response.data || 'Unknown server error';        
+        console.log("Full error response:", JSON.stringify(error.response.data, null, 2));        
         if (status === 400) {
           alert(`Bad Request: ${JSON.stringify(message)}. Please check your input data.`);
         } else if (status === 401) {
@@ -280,40 +230,32 @@ const CreateEvent = () => {
     } finally {
       setLoading(false);
     }
-  };
-  
+  };  
 
-  // Delete an event category (might involve multiple events with the same name)
+  // Delete an event category 
   const handleDeleteCategory = async (indexToDelete) => {
-    const categoryToDelete = categories[indexToDelete];
-    
+    const categoryToDelete = categories[indexToDelete];    
     console.log("Attempting to delete category:", categoryToDelete);
-    console.log("Event IDs to delete:", categoryToDelete.eventIds);
-    
+    console.log("Event IDs to delete:", categoryToDelete.eventIds);    
     const confirmMessage = categoryToDelete.count > 1 
       ? `Are you sure you want to delete all ${categoryToDelete.count} "${categoryToDelete.category}" events?`
-      : `Are you sure you want to delete "${categoryToDelete.category}" event?`;
-    
+      : `Are you sure you want to delete "${categoryToDelete.category}" event?`;    
     if (window.confirm(confirmMessage)) {
       try {
-        setLoading(true);
-        
+        setLoading(true);        
         // Delete all events in this category
         console.log("Starting delete operations...");
         const deletePromises = categoryToDelete.eventIds.map((eventId, index) => {
           console.log(`Deleting event ${index + 1}/${categoryToDelete.eventIds.length} with ID: ${eventId}`);
           return deleteEvent(eventId);
-        });
-        
+        });     
+        //Wait for all deletions to finish   
         const results = await Promise.all(deletePromises);
-        console.log("Delete results:", results);
-        
+        console.log("Delete results:", results);        
         // Remove from local state
-        setCategories(categories.filter((_, index) => index !== indexToDelete));
-        
+        setCategories(categories.filter((_, index) => index !== indexToDelete));        
         const deletedCount = categoryToDelete.eventIds.length;
-        alert(`${deletedCount} event(s) deleted successfully!`);
-        
+        alert(`${deletedCount} event(s) deleted successfully!`);        
       } catch (error) {
         console.error("Error deleting events:", error);
         console.error("Delete error details:", {
@@ -322,8 +264,7 @@ const CreateEvent = () => {
           status: error.response?.status,
           statusText: error.response?.statusText,
           url: error.config?.url
-        });
-        
+        });        
         if (error.response?.status === 404) {
           alert("Delete failed: The DELETE endpoint was not found. Please check if the backend has the DELETE /api/events/:id endpoint implemented.");
         } else {

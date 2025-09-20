@@ -4,7 +4,6 @@ import { loginUser } from '../services/UserService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -106,20 +105,6 @@ const LoginPage = () => {
                 className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {/* <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                Remember me
-              </label>
-              <button 
-                type="button"
-                className="text-red-500 text-sm hover:underline bg-transparent border-none cursor-pointer"
-                onClick={() => alert('Forgot password functionality not implemented yet')}
-              >
-                Forgot Password
-              </button>
-            </div> */}
-
             <button 
               type="submit" 
               disabled={loading}

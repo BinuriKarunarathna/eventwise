@@ -50,19 +50,16 @@ const Dashboard = () => {
     const totalSpent = expensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
     const remaining = totalBudget - totalSpent;
     setDashboardStats({ totalBudget, totalSpent, remaining });
-
-    // Monthly Spending Data
+    // Spending Insights Data
     const eventSpendingChartData = eventsData.map(event => {
-    const eventExpenses = expensesData.filter(exp => exp.eventId === event.id);
-    const spent = eventExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
-    return {
-      name: event.name || `Event ${event.id}`,
-      value: spent
-    };
-  }).filter(item => item.value > 0);
-
-  setMonthlySpendingData(eventSpendingChartData);
-
+      const eventExpenses = expensesData.filter(exp => exp.eventId === event.id);
+      const spent = eventExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+      return {
+        name: event.name || `Event ${event.id}`,
+        value: spent
+      };
+    }).filter(item => item.value > 0);
+    setMonthlySpendingData(eventSpendingChartData);
     // Budget Allocation by Event
     const eventAllocation = eventsData.map((event, index) => ({
       name: event.name || `Event ${index + 1}`,
@@ -76,7 +73,7 @@ const Dashboard = () => {
       setEvents([]);
       setAllExpenses([]);
       setEventSpendingData([]); 
-      processChartData([], []);
+      processChartData([], []); //clear charts
       setLoading(false);
       return;
     }
@@ -85,10 +82,8 @@ const Dashboard = () => {
       const eventsResponse = await getAllEvents(userId);
       const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
       setEvents(eventsData);
-
       let allExpensesData = [];
       let perEventData = [];
-
       for (const event of eventsData) {
         try {
           const expensesResponse = await getAllExpenses(event.id);
@@ -99,9 +94,7 @@ const Dashboard = () => {
               eventId: event.id,
               eventName: event.name,
             }))
-          );
-
-          
+          );          
           const eventTotal = eventExpenses.reduce(
             (sum, expense) => sum + parseFloat(expense.amount || 0),
             0
@@ -114,10 +107,8 @@ const Dashboard = () => {
           console.error("Error fetching expenses for event:", event.id, expenseError);
         }
       }
-
       setAllExpenses(allExpensesData);
       setEventSpendingData(perEventData); 
-
       const totalSpent = allExpensesData.reduce(
         (sum, expense) => sum + parseFloat(expense.amount || 0),
         0
@@ -127,13 +118,11 @@ const Dashboard = () => {
         0
       );
       const remaining = totalBudget - totalSpent;
-
       setDashboardStats({
         totalBudget,
         totalSpent,
         remaining,
       });
-
       processChartData(eventsData, allExpensesData);
     } catch (error) {
       setEvents([]);
@@ -143,13 +132,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId, processChartData]);;
-// ...existing code...
+  }, [userId, processChartData]);
 
   // Fetch data when userId is available
   useEffect(() => {
-    console.log("Data fetching useEffect triggered, userId:", userId);
-    
+    console.log("Data fetching useEffect triggered, userId:", userId);    
     // Always call fetchDashboardData, let it handle the userId check
     fetchDashboardData();
   }, [userId, fetchDashboardData]);
@@ -308,7 +295,7 @@ const Dashboard = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Monthly Spending</h2>
+              <h2 className="text-2xl font-bold text-gray-800">Spending Insights</h2>
             </div>
             {monthlySpendingData.length > 0 ? (
               <ResponsiveContainer width="100%" height={380}>

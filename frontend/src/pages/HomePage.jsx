@@ -6,8 +6,7 @@ import { Link } from 'react-router-dom';
 const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <NavBar />
-      
+      <NavBar />      
       <div className="flex-grow">
         <div className="flex flex-col md:flex-row shadow-lg rounded-lg w-full max-w-5xl mx-auto my-8">
           {/* Left Side - Content */}
@@ -16,8 +15,7 @@ const HomePage = () => {
               <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
                 <span className="block">Plan Smart</span>
                 <span className="block text-indigo-600">Spend Right</span>
-              </h1>
-              
+              </h1>              
               <div className="mt-8 max-w-2xl mx-auto md:mx-0 text-xl text-gray-500">
                 <ul className="space-y-4 text-left">
                   <li className="flex items-start">
@@ -39,8 +37,7 @@ const HomePage = () => {
                     <span className="ml-2">Get spending insights.</span>
                   </li>
                 </ul>
-              </div>
-              
+              </div>              
               <div className="mt-10 flex flex-col md:flex-row gap-6 md:gap-10 justify-center">
                 <Link 
                   to="/dashboard" 
@@ -49,17 +46,14 @@ const HomePage = () => {
                   Get Started
                 </Link>
                 <Link 
-                  to="/login" 
+                  to="/" 
                   className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 inline-flex justify-center"
                 >
                   Go to Login
                 </Link>
               </div>
-
-
             </div>
           </div>
-
           {/* Right Side - EventWise and Calendar Icon */}
           <div className="md:w-1/2 flex items-center justify-center bg-gray-50 p-8">
             <div className="flex flex-col items-center">
@@ -76,7 +70,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );

@@ -19,6 +19,7 @@ const ExpenseManagement = () => {
   const [editingExpense, setEditingExpense] = useState(null);
   const [userId, setUserId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [totalUserSpent, setTotalUserSpent] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,16 +49,13 @@ const ExpenseManagement = () => {
       setLoading(false);
       return;
     }
-
     try {
-      setLoading(true);
-      
+      setLoading(true);      
       // Fetch user events
       const eventsResponse = await getAllEvents(userId);
       // const eventsData = eventsResponse.data?.data || eventsResponse.data || [];
       const eventsData = eventsResponse.data?.data || [];
       setEvents(eventsData);
-
       // If there's a selected event, fetch its expenses
       if (selectedEvent) {
         const expensesResponse = await getAllExpenses(selectedEvent);
@@ -87,25 +85,21 @@ const ExpenseManagement = () => {
       console.log("getTotalUserExpenses: No userId or events", { userId, eventsLength: events.length });
       return 0;
     }
-
     try {
       let totalSpent = 0;
-      console.log("Calculating total for events:", events);
-      
+      console.log("Calculating total for events:", events);      
       // Fetch expenses for each event and sum them up
       for (const event of events) {
         console.log("Fetching expenses for event:", event.id);
         const expensesResponse = await getAllExpenses(event.id);
         const expensesData = expensesResponse.data?.data || [];
-        console.log("Expenses data for event", event.id, ":", expensesData);
-        
+        console.log("Expenses data for event", event.id, ":", expensesData);        
         if (Array.isArray(expensesData)) {
           const eventTotal = expensesData.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
           console.log("Event", event.id, "total:", eventTotal);
           totalSpent += eventTotal;
         }
-      }
-      
+      }      
       console.log("Final total spent:", totalSpent);
       return totalSpent;
     } catch (error) {
@@ -116,34 +110,27 @@ const ExpenseManagement = () => {
 
   // Fetch expenses when event changes
   const fetchExpenses = useCallback(async () => {
-    if (!selectedEvent) return;
-    
+    if (!selectedEvent) return;    
     try {
       console.log("Fetching expenses for event ID:", selectedEvent);
       const expensesResponse = await getAllExpenses(selectedEvent);
-      console.log("Full expenses response:", expensesResponse);
-      
+      console.log("Full expenses response:", expensesResponse);      
       // Try different possible response structures
-      let expensesData = expensesResponse.data?.data || [];
-      
+      let expensesData = expensesResponse.data?.data || [];      
       // Check if data is nested differently
       if (expensesResponse.data && expensesResponse.data.data) {
         expensesData = expensesResponse.data.data;
       }
-      
       // Check if it's in a different structure
       if (expensesResponse.data && expensesResponse.data.expenses) {
         expensesData = expensesResponse.data.expenses;
-      }
-      
+      }      
       console.log("Extracted expenses data:", expensesData);
-      console.log("Is expenses data an array?", Array.isArray(expensesData));
-      
+      console.log("Is expenses data an array?", Array.isArray(expensesData));      
       // Ensure we always set an array
       const finalExpenses = Array.isArray(expensesData) ? expensesData : [];
       console.log("Final expenses to set:", finalExpenses);
-      setExpenses(finalExpenses);
-      
+      setExpenses(finalExpenses);      
       // Recalculate total after fetching expenses
       if (events.length > 0) {
         const total = await getTotalUserExpenses();
@@ -164,46 +151,37 @@ const ExpenseManagement = () => {
   }, [selectedEvent, fetchExpenses]);
 
   const validateForm = () => {
-    const newErrors = {};
-    
+    const newErrors = {};    
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
-    }
-    
+    }    
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
     }
-
     if (!selectedEvent) {
       newErrors.event = 'Please select an event';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+    e.preventDefault();    
     if (!validateForm()) return;
-
     try {
       const expenseData = {
         name: formData.name,
         amount: parseFloat(formData.amount),
         event_id: selectedEvent // Use event_id to match your database column
       };
-
       if (editingExpense) {
         await updateExpense(editingExpense.id, expenseData);
       } else {
         await createExpense(expenseData);
       }
-
       // Reset form and refresh data
       resetForm();
-      fetchExpenses();
-      
+      fetchExpenses();      
       // Recalculate total user expenses
       const total = await getTotalUserExpenses();
       setTotalUserSpent(total);
@@ -226,8 +204,7 @@ const ExpenseManagement = () => {
     try {
       await deleteExpense(expenseId);
       fetchExpenses();
-      setDeleteConfirm(null);
-      
+      setDeleteConfirm(null);      
       // Recalculate total user expenses
       const total = await getTotalUserExpenses();
       setTotalUserSpent(total);
@@ -260,9 +237,7 @@ const ExpenseManagement = () => {
     }
     return expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
   };
-
-  const [totalUserSpent, setTotalUserSpent] = useState(0);
-
+  
   // Calculate total user expenses when events change
   useEffect(() => {
     const calculateTotal = async () => {
@@ -270,8 +245,7 @@ const ExpenseManagement = () => {
       const total = await getTotalUserExpenses();
       console.log("Setting total user spent to:", total);
       setTotalUserSpent(total);
-    };
-    
+    };    
     if (events.length > 0) {
       console.log("Events available, calculating total:", events);
       calculateTotal();

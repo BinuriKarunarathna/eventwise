@@ -46,6 +46,9 @@ router.put('/:userId', async (req, res) => {
     console.error('Error updating profile:', error);
     res.status(500).json({ error: 'Error updating profile' });
   }
+  finally {
+    if (connection) connection.release();
+  }
 });
 
 module.exports = router;

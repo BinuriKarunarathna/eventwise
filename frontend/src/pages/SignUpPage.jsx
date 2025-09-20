@@ -117,13 +117,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* <div className="flex items-start">
-              <input type="checkbox" className="mt-1 mr-2" />
-              <p className="text-sm text-left">
-                I agree to all the <span className="text-red-500">Terms</span> and <span className="text-red-500">Privacy Policies</span>
-              </p>
-            </div> */}
-
             <button type="submit"  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
               Create account
             </button>
