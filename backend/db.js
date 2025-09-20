@@ -17,7 +17,6 @@ const pool = mysql.createPool({
 });
 
 // Test database connection
-
 pool.getConnection()
   .then(connection => {
     console.log('✅ Clever Cloud MySQL database connected successfully');

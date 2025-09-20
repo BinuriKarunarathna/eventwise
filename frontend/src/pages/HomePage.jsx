@@ -48,6 +48,12 @@ const HomePage = () => {
                   >
                   Get Started
                 </Link>
+                <Link 
+                  to="/" 
+                  className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 inline-flex justify-center"
+                  >
+                  Login
+                </Link>
               </div>
             </div>
           </div>

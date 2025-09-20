@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // MySQL pool connection
-const bcrypt = require('bcryptjs');
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -14,7 +13,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // Register user
 router.post('/register', async (req, res) => {
   const { email, password, full_name } = req.body;
@@ -24,7 +22,6 @@ router.post('/register', async (req, res) => {
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Email already exists' });
     }
-    // Store password as plain text (NOT RECOMMENDED FOR PRODUCTION)
     await pool.query('INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)', [email, password, full_name]);
     res.json({ message: 'User registered successfully' });
   } catch (error) {
@@ -42,7 +39,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     const user = users[0];
-    // Plain text password check (NOT RECOMMENDED FOR PRODUCTION)
     if (password !== user.password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -67,8 +63,6 @@ router.get('/:userId', async (req, res) => {
     res.status(500).json({ error: 'Error fetching user' });
   }
 });
-
-
 
 
 module.exports = router;
