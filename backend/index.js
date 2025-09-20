@@ -3,7 +3,6 @@ const cors = require('cors');
 const eventRoutes = require('./routes/events');
 const userRoutes = require('./routes/users');
 const profileRoutes = require('./routes/profiles');
-//const reportRoutes = require('./routes/reports');
 const expenseRoutes = require('./routes/expenses');
 const testRoutes = require('./routes/test');
 const app = express();
@@ -33,7 +32,6 @@ app.get('/api/health', (req, res) => {
 app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profiles', profileRoutes);
-//app.use('/api/reports', reportRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/test', testRoutes);
 

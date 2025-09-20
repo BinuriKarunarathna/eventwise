@@ -41,20 +41,21 @@ const HomePage = () => {
                 </ul>
               </div>
               
-              <div className="mt-10">
+              <div className="mt-10 flex flex-wrap gap-4 justify-center">
                 <Link 
                   to="/dashboard" 
                   className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 inline-flex justify-center"
-                  >
+                >
                   Get Started
                 </Link>
                 <Link 
-                  to="/" 
+                  to="/login" 
                   className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 inline-flex justify-center"
-                  >
-                  Login
+                >
+                  Go to Login
                 </Link>
               </div>
+
             </div>
           </div>
 

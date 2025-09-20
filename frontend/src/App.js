@@ -5,7 +5,6 @@ import SignUpPage from './pages/SignUpPage';
 import HomePage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
 import CreateEvent from './pages/CreateEvent';
-import ReportDashboard from './pages/ReportDashboard';
 import Profile from './pages/Profile';
 import ExpenseManagement from './pages/ExpenseManagement';
 
@@ -19,10 +18,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/expenses" element={<ExpenseManagement />} />
-        {/* <Route path="/reports" element={<ReportDashboard />} /> */}
         <Route path="/profile" element={<Profile />} />
-        {/* Add more routes as needed */}
-        {/* Example: <Route path="/dashboard" element={<DashboardPage />} /> */}
       </Routes>
     </Router>
   );
