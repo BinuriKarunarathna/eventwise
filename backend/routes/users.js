@@ -69,6 +69,6 @@ router.get('/:userId', async (req, res) => {
 });
 
 
-// (Optional) Update user information endpoint can be added here if needed
+
 
 module.exports = router;
