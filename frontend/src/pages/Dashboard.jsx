@@ -240,7 +240,7 @@ const Dashboard = () => {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
                 Event Dashboard
               </h1>
-              <p className="text-gray-600 text-lg">Manage your events and track your budget with style</p>
+              <p className="text-gray-600 text-lg">Manage your events and track your budget</p>
             </div>
             <button
               onClick={refreshDashboard}

@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const pool = require('./db'); // Import the database pool
+// const bcrypt = require('bcryptjs');
+// const pool = require('./db'); 
 const eventRoutes = require('./routes/events');
 const userRoutes = require('./routes/users');
 const profileRoutes = require('./routes/profiles');

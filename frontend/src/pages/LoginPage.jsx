@@ -106,7 +106,7 @@ const LoginPage = () => {
                 className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input type="checkbox" className="mr-2" />
                 Remember me
@@ -118,7 +118,7 @@ const LoginPage = () => {
               >
                 Forgot Password
               </button>
-            </div>
+            </div> */}
 
             <button 
               type="submit" 
